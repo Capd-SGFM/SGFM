@@ -78,6 +78,27 @@ services:
     - CHOKIDAR_USEPOLLING=true
     networks:
       - trading_net
+    
+  backtesting_backend:
+    build:
+      context: .
+      dockerfile: ./backtesting_backend/Dockerfile
+    container_name: backtesting_backend
+    depends_on:
+      - database
+      - redis
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8090:8002"
+    working_dir: /app
+    volumes:
+      - ./backtesting_backend:/app
+    environment:
+      FRONTEND_URL: http://localhost:5173
+    networks:
+      - trading_net
 
 
 networks:

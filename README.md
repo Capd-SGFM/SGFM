@@ -20,6 +20,8 @@ docker-compose up --build
 # logs 확인
 docker-compose logs -f backend
 
+docker-compose logs -f backtesting_backend
+
 docker-compose logs -f frontend
 
 docker-compose logs -f database
@@ -43,3 +45,7 @@ docker compose stop worker
 docker exec -it redis redis-cli FLUSHDB
 docker compose up -d --build worker
 docker compose logs -f worker
+
+# backtesting backend 관리
+docker-compose build --no-cache backtesting_backend
+docker-compose up -d
