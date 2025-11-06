@@ -1,0 +1,88 @@
+services:
+  database:
+    image: timescale/timescaledb:2.15.1-pg15
+    container_name: database
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init_schema:/docker-entrypoint-initdb.d
+    networks:
+      - trading_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - trading_net
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./db_update_backend/Dockerfile
+    container_name: backend
+    depends_on:
+      - database
+      - redis
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8080:8000"
+    working_dir: /app
+    volumes:
+      - ./db_update_backend:/app
+    environment:
+      FRONTEND_URL: http://localhost:5173
+    networks:
+      - trading_net
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./db_update_backend/Dockerfile
+    container_name: worker
+    command: celery -A celery_task.celery_app worker --loglevel=info --concurrency=4
+    depends_on:
+      - database
+      - redis
+    restart: always
+    env_file:
+      - .env
+    working_dir: /app
+    volumes:
+      - ./db_update_backend:/app
+    networks:
+      - trading_net
+
+  frontend:
+    build:
+      context: ./react_frontend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./react_frontend:/app
+      - /app/node_modules
+    environment:
+    - CHOKIDAR_USEPOLLING=true
+    networks:
+      - trading_net
+
+
+networks:
+  trading_net:
+    driver: bridge
+
+volumes:
+  db_data:
