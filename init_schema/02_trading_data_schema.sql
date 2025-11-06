@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 -- ========= 1. 스키마 생성 =========
 CREATE SCHEMA IF NOT EXISTS trading_data;
-
+-- 수정확인 --
 -- ========= 2. 거래 데이터 스키마 (OHLCV) =========
 -- 1분봉 (템플릿 테이블)
 CREATE TABLE IF NOT EXISTS trading_data.ohlcv_1m (
