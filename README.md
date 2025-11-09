@@ -37,6 +37,9 @@ docker exec -it backend ls /app/db_module
 docker exec -it backend ls -R /app
 
 
+# frontend 재시작
+docker compose stop frontend
+docker compose up -d --build frontend
 
 
 

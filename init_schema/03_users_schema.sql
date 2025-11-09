@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS users.accounts (
     last_login       TIMESTAMPTZ  NULL
 );
 
--- updated_at 자동 갱신 트리거
 CREATE OR REPLACE FUNCTION users.touch_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
@@ -43,6 +42,11 @@ CREATE TABLE IF NOT EXISTS users.backtest_results (
     interval VARCHAR(10) NOT NULL,
     strategy_sql TEXT NOT NULL,
     risk_reward_ratio NUMERIC(5,2) NOT NULL,
+
+    -- 손절 관련 파라미터
+    stop_loss_type TEXT DEFAULT 'low',                -- 'low' | 'custom'
+    stop_loss_value NUMERIC(20,8),                    -- 사용자 지정 손절가
+
     start_time TIMESTAMPTZ NOT NULL,
     end_time TIMESTAMPTZ NOT NULL,
 
@@ -60,7 +64,6 @@ CREATE TABLE IF NOT EXISTS users.backtest_results (
     UNIQUE (google_id, symbol, interval, start_time, entry_time)
 );
 
--- updated_at 자동 갱신 트리거
 CREATE OR REPLACE FUNCTION users.touch_backtest_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
@@ -73,8 +76,6 @@ CREATE TRIGGER trg_backtest_touch
 BEFORE UPDATE ON users.backtest_results
 FOR EACH ROW EXECUTE FUNCTION users.touch_backtest_updated_at();
 
-
--- 인덱스 생성 (조회 성능 향상)
 CREATE INDEX IF NOT EXISTS idx_backtest_results_user ON users.backtest_results(google_id);
 CREATE INDEX IF NOT EXISTS idx_backtest_results_symbol ON users.backtest_results(symbol);
 CREATE INDEX IF NOT EXISTS idx_backtest_results_interval ON users.backtest_results(interval);
