@@ -1,4 +1,4 @@
-react_frontend/
+Frontend/
 backtesting_backend/
-db_update_backend/
+DB_backend/
 .env
