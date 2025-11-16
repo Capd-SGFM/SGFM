@@ -1,4 +1,5 @@
 Frontend/
 backtesting_backend/
 DB_backend/
+LLM_Server/
 .env
