@@ -1,6 +1,5 @@
 CREATE SCHEMA IF NOT EXISTS metadata;
 
--- 핵심 거래 규칙을 저장하는 테이블
 CREATE TABLE IF NOT EXISTS metadata.crypto_info (
     symbol VARCHAR(30) PRIMARY KEY,
     

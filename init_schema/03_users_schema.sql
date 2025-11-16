@@ -1,8 +1,5 @@
 CREATE SCHEMA IF NOT EXISTS users;
 
--- =======================
--- 1. 사용자 계정 테이블
--- =======================
 CREATE TABLE IF NOT EXISTS users.accounts (
     google_id        VARCHAR(256) PRIMARY KEY,
     username         VARCHAR(12)  NOT NULL,
@@ -29,10 +26,7 @@ FOR EACH ROW EXECUTE FUNCTION users.touch_updated_at();
 CREATE INDEX IF NOT EXISTS idx_users_accounts_email ON users.accounts(email);
 
 
-
--- ===========================
--- 2. 백테스트 실행 결과 테이블
--- ===========================
+-- 백테스트 실행 결과 테이블
 CREATE TABLE IF NOT EXISTS users.backtest_results (
     id SERIAL PRIMARY KEY,
     google_id VARCHAR(256) NOT NULL REFERENCES users.accounts(google_id) ON DELETE CASCADE,

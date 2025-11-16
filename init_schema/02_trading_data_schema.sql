@@ -1,10 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
--- ========= 1. 스키마 생성 =========
 CREATE SCHEMA IF NOT EXISTS trading_data;
--- 수정확인 --
--- ========= 2. 거래 데이터 스키마 (OHLCV) =========
--- 1분봉 (템플릿 테이블)
+-- 캔들 데이터 스키마
 CREATE TABLE IF NOT EXISTS trading_data.ohlcv_1m (
     symbol      VARCHAR(30)   NOT NULL REFERENCES metadata.crypto_info(symbol) ON DELETE CASCADE,
     "timestamp" TIMESTAMPTZ   NOT NULL,
@@ -14,7 +11,6 @@ CREATE TABLE IF NOT EXISTS trading_data.ohlcv_1m (
     close       NUMERIC(20,7) NOT NULL,
     volume      NUMERIC(20,3) NOT NULL,
     is_ended    BOOLEAN       NOT NULL DEFAULT FALSE,
-    updated_at  TIMESTAMPTZ   NOT NULL DEFAULT now(),
     CONSTRAINT ohlcv_1m_pk PRIMARY KEY (symbol, "timestamp")
 );
 
@@ -65,7 +61,6 @@ BEGIN
                 close       NUMERIC(20,7) NOT NULL,
                 volume      NUMERIC(20,3) NOT NULL,
                 is_ended    BOOLEAN       NOT NULL DEFAULT FALSE,
-                updated_at  TIMESTAMPTZ   NOT NULL DEFAULT now(),
                 CONSTRAINT %I PRIMARY KEY (symbol, "timestamp"),
                 CONSTRAINT %I %s
             );
@@ -93,19 +88,14 @@ BEGIN
 END
 $$;
 
--- ========= 3. 보조지표 스키마 (Indicators) =========
-
--- 1분봉 (템플릿 테이블)
+-- 보조지표 스키마
 CREATE TABLE IF NOT EXISTS trading_data.indicators_1m (
     symbol      VARCHAR(30)   NOT NULL REFERENCES metadata.crypto_info(symbol) ON DELETE CASCADE,
     "timestamp" TIMESTAMPTZ   NOT NULL,
     rsi_14      NUMERIC(20,7) NOT NULL,
     ema_7       NUMERIC(20,7) NOT NULL,
     ema_21      NUMERIC(20,7) NOT NULL,
-    ema_99      NUMERIC(20,7) NOT NULL,
-    sma_7       NUMERIC(20,7) NOT NULL,
-    sma_21      NUMERIC(20,7) NOT NULL,
-    sma_99      NUMERIC(20,7) NOT NULL,
+    ema_99      NUMERIC(20,7),
     macd        NUMERIC(20,7) NOT NULL,
     macd_signal NUMERIC(20,7) NOT NULL,
     macd_hist   NUMERIC(20,7) NOT NULL,
@@ -160,10 +150,7 @@ BEGIN
                 rsi_14      NUMERIC(20,7) NOT NULL,
                 ema_7       NUMERIC(20,7) NOT NULL,
                 ema_21      NUMERIC(20,7) NOT NULL,
-                ema_99      NUMERIC(20,7) NOT NULL,
-                sma_7       NUMERIC(20,7) NOT NULL,
-                sma_21      NUMERIC(20,7) NOT NULL,
-                sma_99      NUMERIC(20,7) NOT NULL,
+                ema_99      NUMERIC(20,7),
                 macd        NUMERIC(20,7) NOT NULL,
                 macd_signal NUMERIC(20,7) NOT NULL,
                 macd_hist   NUMERIC(20,7) NOT NULL,
