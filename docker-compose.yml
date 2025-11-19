@@ -22,11 +22,11 @@ services:
     networks:
       - trading_net
 
-  backend:
+  db_backend:
     build:
       context: .
       dockerfile: ./DB_backend/Dockerfile
-    container_name: backend
+    container_name: db_backend
     depends_on:
       - database
       - redis
@@ -52,7 +52,7 @@ services:
     depends_on:
       - database
       - redis
-      - backend
+      - db_backend
     restart: always
     env_file:
       - .env
@@ -71,7 +71,7 @@ services:
       target: dev
     container_name: frontend
     depends_on:
-      - backend
+      - db_backend
     ports:
       - "5173:5173"
     env_file:

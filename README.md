@@ -18,7 +18,7 @@ docker-compose up --build
 
 
 # logs 확인
-docker-compose logs -f backend
+docker-compose logs -f db_backend
 
 docker-compose logs -f backtesting_backend
 
