@@ -52,12 +52,15 @@ services:
     depends_on:
       - database
       - redis
+      - backend
     restart: always
     env_file:
       - .env
     working_dir: /app
     volumes:
       - ./DB_backend:/app
+    environment:
+      - PYTHONPATH=/app
     networks:
       - trading_net
 

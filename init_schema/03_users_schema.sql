@@ -41,6 +41,10 @@ CREATE TABLE IF NOT EXISTS users.backtest_results (
     stop_loss_type TEXT DEFAULT 'low',                -- 'low' | 'custom'
     stop_loss_value NUMERIC(20,8),                    -- 사용자 지정 손절가
 
+    -- 추가 파라미터 (Long/Short, 레버리지)
+    position_side TEXT DEFAULT 'LONG',                -- 'LONG' | 'SHORT'
+    leverage DOUBLE PRECISION DEFAULT 1.0,            -- 레버리지 배수
+
     start_time TIMESTAMPTZ NOT NULL,
     end_time TIMESTAMPTZ NOT NULL,
 

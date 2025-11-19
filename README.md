@@ -49,6 +49,9 @@ docker exec -it redis redis-cli FLUSHDB
 docker compose up -d --build worker
 docker compose logs -f worker
 
+# Celery worker 확인
+docker exec -it worker celery -A celery_task.celery_app inspect registered
+
 # backtesting backend 관리
 docker-compose build --no-cache backtesting_backend
 docker-compose up -d
