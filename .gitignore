@@ -4,3 +4,4 @@ DB_backend/
 LLM_Server_backend/
 paper_trading_backend/
 .env
+.env.server

@@ -41,12 +41,11 @@ services:
     networks:
       - trading_net
 
-  worker:
+  worker_cpu:
     build:
       context: .
       dockerfile: ./DB_backend/Dockerfile.server
-    container_name: worker
-    command: celery -A celery_task.celery_app worker --loglevel=info --concurrency=4
+    container_name: worker_cpu
     depends_on:
       - database
       - redis
@@ -57,8 +56,68 @@ services:
     working_dir: /app
     volumes:
       - ./DB_backend:/app
+    # 🚀 CPU Worker: Handles API, WebSocket, General Tasks (Queue: celery)
+    command: celery -A celery_task worker --pool=threads --concurrency=24 -Q celery --loglevel=info
     environment:
       - PYTHONPATH=/app
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - trading_net
+
+  worker_indicator:
+    build:
+      context: .
+      dockerfile: ./DB_backend/Dockerfile.server
+    container_name: worker_indicator
+    depends_on:
+      - database
+      - redis
+      - backend
+    restart: always
+    env_file:
+      - .env.server
+    working_dir: /app
+    volumes:
+      - ./DB_backend:/app
+    # 🚀 Indicator Worker: Handles Indicator Calculations (Queue: indicators)
+    # Uses GPU via prefork pool
+    command: celery -A celery_task worker --pool=prefork --concurrency=16 --autoscale=${CELERY_WORKER_AUTOSCALE:-16,2} -Q indicators --loglevel=info
+    environment:
+      - PYTHONPATH=/app
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - trading_net
+
+  websocket:
+    build:
+      context: .
+      dockerfile: ./DB_backend/Dockerfile.server
+    container_name: websocket
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./DB_backend:/app
+    # 🚀 Dedicated Worker for WebSocket (Queue: websocket)
+    command: celery -A celery_task worker --pool=threads --concurrency=4 -n websocket@%h -Q websocket --loglevel=info
+    environment:
+      - PYTHONPATH=/app
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    env_file:
+      - .env.server
+    depends_on:
+      - redis
+      - database
     networks:
       - trading_net
 
@@ -69,6 +128,7 @@ services:
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL}
         VITE_BACKTESTING_BACKEND_URL: ${VITE_BACKTESTING_BACKEND_URL}
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
     container_name: frontend
     depends_on:
       - backend
