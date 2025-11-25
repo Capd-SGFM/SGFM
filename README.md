@@ -55,3 +55,11 @@ docker exec -it worker celery -A celery_task.celery_app inspect registered
 # backtesting backend 관리
 docker-compose build --no-cache backtesting_backend
 docker-compose up -d
+
+######################
+
+docker compose -f docker-compose.server.yml up -d --build
+
+docker compose -f docker-compose.server.yml logs -f backtesting_backend
+
+docker compose -f docker-compose.server.yml up -d --build backtesting_backend
