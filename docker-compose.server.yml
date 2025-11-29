@@ -158,6 +158,25 @@ services:
     networks:
       - trading_net
 
+  paper_trading_backend:
+    build:
+      context: .
+      dockerfile: ./paper_trading_backend/Dockerfile
+    container_name: paper_trading_backend
+    depends_on:
+      - database
+      - redis
+    restart: always
+    env_file:
+      - .env.server
+    ports:
+      - "8003:8003"
+    working_dir: /app
+    volumes:
+      - ./paper_trading_backend:/app
+    networks:
+      - trading_net
+
 
 networks:
   trading_net:
