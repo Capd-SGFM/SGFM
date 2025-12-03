@@ -123,8 +123,9 @@ CREATE INDEX IF NOT EXISTS idx_market_trades_trade_id ON futures.market_trades(t
 CREATE INDEX IF NOT EXISTS idx_market_trades_created_at ON futures.market_trades(created_at DESC);
 
 -- 오래된 데이터 자동 삭제를 위한 인덱스 (24시간 이상 지난 데이터)
-CREATE INDEX IF NOT EXISTS idx_market_trades_cleanup ON futures.market_trades(created_at) 
-WHERE created_at < NOW() - INTERVAL '24 hours';
+-- 오래된 데이터 자동 삭제를 위한 인덱스 (24시간 이상 지난 데이터)
+-- NOW() is not immutable, so cannot be used in partial index. Just index created_at.
+-- CREATE INDEX IF NOT EXISTS idx_market_trades_cleanup ON futures.market_trades(created_at);
 
 COMMENT ON TABLE futures.market_trades IS '실시간 거래소 체결 내역 (최근 거래)';
 
@@ -208,8 +209,10 @@ CREATE TABLE IF NOT EXISTS futures.accounts (
     CONSTRAINT positive_available_balance CHECK (available_balance >= 0),
     CONSTRAINT positive_margin_balance CHECK (margin_balance >= 0),
     CONSTRAINT unique_account_name_per_user UNIQUE (google_id, account_name),
-    CONSTRAINT unique_default_account UNIQUE (google_id, is_default) WHERE is_default = TRUE
+    CONSTRAINT unique_account_name_per_user UNIQUE (google_id, account_name)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_default_account ON futures.accounts (google_id) WHERE is_default = TRUE;
 
 CREATE INDEX IF NOT EXISTS idx_futures_accounts_user ON futures.accounts(google_id);
 CREATE INDEX IF NOT EXISTS idx_futures_accounts_default ON futures.accounts(google_id, is_default);
@@ -587,7 +590,32 @@ CREATE INDEX IF NOT EXISTS idx_margin_calls_resolved ON futures.margin_calls(is_
 
 
 -- =====================================
--- 12. 심볼별 통계 테이블 (선택 사항)
+-- 12. 레버리지 브래킷 테이블 (Binance Tiered Leverage)
+-- =====================================
+-- 각 심볼의 레버리지별 최대 포지션 제한 정보
+-- Binance API: GET /fapi/v1/leverageBracket
+CREATE TABLE IF NOT EXISTS futures.leverage_brackets (
+    symbol              VARCHAR(30) NOT NULL REFERENCES metadata.crypto_info(symbol) ON DELETE CASCADE,
+    bracket_id          INTEGER NOT NULL,                       -- 브래킷 레벨 (1, 2, 3...)
+    
+    initial_leverage    INTEGER NOT NULL,                       -- 해당 구간의 최대 허용 레버리지 (예: 125)
+    max_notional        NUMERIC(30, 8) NOT NULL,                -- 해당 구간의 최대 포지션 금액 (USDT)
+    min_notional        NUMERIC(30, 8) NOT NULL DEFAULT 0,      -- 해당 구간의 최소 포지션 금액
+    
+    maint_margin_rate   NUMERIC(10, 5) NOT NULL,                -- 유지 증거금 비율 (예: 0.004 = 0.4%)
+    cum_fast_maint_amount NUMERIC(30, 8) NOT NULL DEFAULT 0,    -- 빠른 유지 증거금 계산을 위한 누적액 (cum)
+    
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    
+    PRIMARY KEY (symbol, bracket_id),
+    CONSTRAINT valid_leverage_bracket CHECK (initial_leverage >= 1)
+);
+
+CREATE INDEX IF NOT EXISTS idx_leverage_brackets_symbol ON futures.leverage_brackets(symbol);
+
+
+-- =====================================
+-- 13. 심볼별 통계 테이블 (선택 사항)
 -- =====================================
 -- 각 심볼의 24시간 통계 정보 캐시 (바이낸스 UI의 통계 표시용)
 CREATE TABLE IF NOT EXISTS futures.symbol_stats_24h (
