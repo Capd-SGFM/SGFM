@@ -22,11 +22,12 @@ services:
     networks:
       - trading_net
 
-  db_backend:
+  backend:
     build:
       context: .
       dockerfile: ./DB_backend/Dockerfile
-    container_name: db_backend
+      target: dev
+    container_name: backend
     depends_on:
       - database
       - redis
@@ -43,6 +44,25 @@ services:
     networks:
       - trading_net
 
+  paper_trading:
+    build:
+      context: .
+      dockerfile: ./paper_trading_backend/Dockerfile
+    container_name: paper_trading
+    depends_on:
+      - database
+      - redis
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8003:8003"
+    working_dir: /app
+    volumes:
+      - ./paper_trading_backend:/app
+    networks:
+      - trading_net
+
   worker:
     build:
       context: .
@@ -52,7 +72,7 @@ services:
     depends_on:
       - database
       - redis
-      - db_backend
+      - backend
     restart: always
     env_file:
       - .env
@@ -64,6 +84,28 @@ services:
     networks:
       - trading_net
 
+  websocket:
+    build:
+      context: .
+      dockerfile: ./DB_backend/Dockerfile
+    container_name: websocket
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./DB_backend:/app
+    command: celery -A celery_task worker --pool=threads --concurrency=4 -n websocket@%h -Q websocket --loglevel=info
+    environment:
+      - PYTHONPATH=/app
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - database
+    networks:
+      - trading_net
+
   frontend:
     build:
       context: ./Frontend
@@ -71,7 +113,8 @@ services:
       target: dev
     container_name: frontend
     depends_on:
-      - db_backend
+      - backend
+      - paper_trading
     ports:
       - "5173:5173"
     env_file:
@@ -89,6 +132,7 @@ services:
     build:
       context: .
       dockerfile: ./backtesting_backend/Dockerfile
+      target: dev
     container_name: backtesting_backend
     depends_on:
       - database

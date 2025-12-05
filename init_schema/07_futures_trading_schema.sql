@@ -123,8 +123,9 @@ CREATE INDEX IF NOT EXISTS idx_market_trades_trade_id ON futures.market_trades(t
 CREATE INDEX IF NOT EXISTS idx_market_trades_created_at ON futures.market_trades(created_at DESC);
 
 -- 오래된 데이터 자동 삭제를 위한 인덱스 (24시간 이상 지난 데이터)
-CREATE INDEX IF NOT EXISTS idx_market_trades_cleanup ON futures.market_trades(created_at) 
-WHERE created_at < NOW() - INTERVAL '24 hours';
+-- 오래된 데이터 자동 삭제를 위한 인덱스 (24시간 이상 지난 데이터)
+-- NOW() is not immutable, so cannot be used in partial index. Just index created_at.
+-- CREATE INDEX IF NOT EXISTS idx_market_trades_cleanup ON futures.market_trades(created_at);
 
 COMMENT ON TABLE futures.market_trades IS '실시간 거래소 체결 내역 (최근 거래)';
 
@@ -208,8 +209,10 @@ CREATE TABLE IF NOT EXISTS futures.accounts (
     CONSTRAINT positive_available_balance CHECK (available_balance >= 0),
     CONSTRAINT positive_margin_balance CHECK (margin_balance >= 0),
     CONSTRAINT unique_account_name_per_user UNIQUE (google_id, account_name),
-    CONSTRAINT unique_default_account UNIQUE (google_id, is_default) WHERE is_default = TRUE
+    CONSTRAINT unique_account_name_per_user UNIQUE (google_id, account_name)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_default_account ON futures.accounts (google_id) WHERE is_default = TRUE;
 
 CREATE INDEX IF NOT EXISTS idx_futures_accounts_user ON futures.accounts(google_id);
 CREATE INDEX IF NOT EXISTS idx_futures_accounts_default ON futures.accounts(google_id, is_default);

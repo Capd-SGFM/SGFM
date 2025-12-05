@@ -41,6 +41,25 @@ services:
     networks:
       - trading_net
 
+  paper_trading:
+    build:
+      context: .
+      dockerfile: ./paper_trading_backend/Dockerfile
+    container_name: paper_trading
+    depends_on:
+      - database
+      - redis
+    restart: always
+    env_file:
+      - .env.server
+    ports:
+      - "8003:8003"
+    working_dir: /app
+    volumes:
+      - ./paper_trading_backend:/app
+    networks:
+      - trading_net
+
   worker_cpu:
     build:
       context: .
@@ -82,7 +101,7 @@ services:
       - ./DB_backend:/app
     # 🚀 Indicator Worker: Handles Indicator Calculations (Queue: indicators)
     # Uses GPU via prefork pool
-    command: celery -A celery_task worker --pool=prefork --concurrency=16 --autoscale=${CELERY_WORKER_AUTOSCALE:-16,2} -Q indicators --loglevel=info
+    command: celery -A celery_task worker --pool=prefork --concurrency=4 --autoscale=${CELERY_WORKER_AUTOSCALE:-4,2} -Q indicators --loglevel=info
     environment:
       - PYTHONPATH=/app
       - NVIDIA_VISIBLE_DEVICES=all
@@ -158,24 +177,7 @@ services:
     networks:
       - trading_net
 
-  paper_trading_backend:
-    build:
-      context: .
-      dockerfile: ./paper_trading_backend/Dockerfile
-    container_name: paper_trading_backend
-    depends_on:
-      - database
-      - redis
-    restart: always
-    env_file:
-      - .env.server
-    ports:
-      - "8003:8003"
-    working_dir: /app
-    volumes:
-      - ./paper_trading_backend:/app
-    networks:
-      - trading_net
+
 
 
 networks:
