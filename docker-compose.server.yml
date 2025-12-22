@@ -26,6 +26,7 @@ services:
     build:
       context: .
       dockerfile: ./DB_backend/Dockerfile.server
+      target: prod
     container_name: backend
     depends_on:
       - database
@@ -38,6 +39,7 @@ services:
     working_dir: /app
     volumes:
       - ./DB_backend:/app
+      - ./ml_models:/app/ml_models
     networks:
       - trading_net
 
@@ -60,11 +62,11 @@ services:
     networks:
       - trading_net
 
-  worker_cpu:
+  worker_general:
     build:
       context: .
       dockerfile: ./DB_backend/Dockerfile.server
-    container_name: worker_cpu
+    container_name: worker_general
     depends_on:
       - database
       - redis
@@ -75,8 +77,31 @@ services:
     working_dir: /app
     volumes:
       - ./DB_backend:/app
-    # 🚀 CPU Worker: Handles API, WebSocket, General Tasks (Queue: celery)
-    command: celery -A celery_task worker --pool=threads --concurrency=24 -Q celery --loglevel=info
+    # 🚀 General CPU Worker: Handles 95 Symbols (Queue: celery)
+    command: celery -A celery_task worker --pool=threads --concurrency=8 -Q celery --loglevel=info
+    environment:
+      - PYTHONPATH=/app
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - trading_net
+
+  worker_vip:
+    build:
+      context: .
+      dockerfile: ./DB_backend/Dockerfile.server
+    container_name: worker_vip
+    depends_on:
+      - database
+      - redis
+      - backend
+    restart: always
+    env_file:
+      - .env.server
+    working_dir: /app
+    volumes:
+      - ./DB_backend:/app
+    command: celery -A celery_task worker --pool=threads --concurrency=8 -n vip_worker@%h -Q vip_queue --loglevel=info
     environment:
       - PYTHONPATH=/app
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -99,6 +124,7 @@ services:
     working_dir: /app
     volumes:
       - ./DB_backend:/app
+      - ./ml_models:/app/ml_models
     # 🚀 Indicator Worker: Handles Indicator Calculations (Queue: indicators)
     # Uses GPU via prefork pool
     command: celery -A celery_task worker --pool=prefork --concurrency=4 --autoscale=${CELERY_WORKER_AUTOSCALE:-4,2} -Q indicators --loglevel=info
@@ -144,6 +170,7 @@ services:
     build:
       context: ./Frontend
       dockerfile: Dockerfile.server
+      target: prod
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL}
         VITE_BACKTESTING_BACKEND_URL: ${VITE_BACKTESTING_BACKEND_URL}
@@ -162,6 +189,7 @@ services:
     build:
       context: .
       dockerfile: ./backtesting_backend/Dockerfile.server
+      target: prod
     container_name: backtesting_backend
     depends_on:
       - database

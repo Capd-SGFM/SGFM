@@ -4,7 +4,8 @@ CREATE SCHEMA IF NOT EXISTS metadata;
 -- 거래 조건은 futures.symbol_trading_rules 테이블에서 관리
 CREATE TABLE IF NOT EXISTS metadata.crypto_info (
     symbol VARCHAR(30) PRIMARY KEY,
-    pair   VARCHAR(30) NOT NULL UNIQUE
+    pair   VARCHAR(30) NOT NULL UNIQUE,
+    is_backtesting_only BOOLEAN DEFAULT FALSE
 );
 
 CREATE INDEX IF NOT EXISTS idx_crypto_info_symbol ON metadata.crypto_info (symbol);

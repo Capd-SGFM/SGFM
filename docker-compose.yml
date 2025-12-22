@@ -68,7 +68,7 @@ services:
       context: .
       dockerfile: ./DB_backend/Dockerfile
     container_name: worker
-    command: celery -A celery_task.celery_app worker --loglevel=info --concurrency=4
+    command: celery -A celery_task.celery_app worker --loglevel=info --concurrency=16
     depends_on:
       - database
       - redis

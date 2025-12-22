@@ -41,15 +41,11 @@ DECLARE
 BEGIN
     FOR rec IN
         SELECT * FROM (VALUES
-            ('3m',  INTERVAL '21 days',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 180) = 0 )'),
             ('5m',  INTERVAL '60 days',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 300) = 0 )'),
             ('15m', INTERVAL '120 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 900) = 0 )'),
-            ('30m', INTERVAL '180 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 1800) = 0 )'),
             ('1h',  INTERVAL '180 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 3600) = 0 )'),
             ('4h',  INTERVAL '365 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 14400) = 0 )'),
-            ('1d',  INTERVAL '5 years',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 86400) = 0 )'),
-            ('1w',  INTERVAL '10 years',  'CHECK ( (EXTRACT(ISODOW FROM "timestamp") = 1) AND ("timestamp"::time = ''00:00:00'') )'),
-            ('1M',  INTERVAL '50 years',  'CHECK ( (EXTRACT(DAY FROM "timestamp") = 1) AND ("timestamp"::time = ''00:00:00'') )')
+            ('1d',  INTERVAL '5 years',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 86400) = 0 )')
         ) AS t(tf, chunk, align_sql)
     LOOP
         tbl_name := 'ohlcv_' || rec.tf;
@@ -135,15 +131,11 @@ DECLARE
 BEGIN
     FOR rec IN 
         SELECT * FROM (VALUES
-            ('3m',  INTERVAL '21 days',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 180) = 0 )'),
             ('5m',  INTERVAL '60 days',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 300) = 0 )'),
             ('15m', INTERVAL '120 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 900) = 0 )'),
-            ('30m', INTERVAL '180 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 1800) = 0 )'),
             ('1h',  INTERVAL '180 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 3600) = 0 )'),
             ('4h',  INTERVAL '365 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 14400) = 0 )'),
-            ('1d',  INTERVAL '5 years',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 86400) = 0 )'),
-            ('1w',  INTERVAL '10 years',  'CHECK ( (EXTRACT(ISODOW FROM "timestamp") = 1) AND ("timestamp"::time = ''00:00:00'') )'),
-            ('1M',  INTERVAL '50 years',  'CHECK ( (EXTRACT(DAY FROM "timestamp") = 1) AND ("timestamp"::time = ''00:00:00'') )')
+            ('1d',  INTERVAL '5 years',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 86400) = 0 )')
         ) AS t(tf, chunk, align_sql)
     LOOP
         tbl_name := 'indicators_' || rec.tf;
@@ -327,15 +319,11 @@ DECLARE
 BEGIN
     FOR rec IN 
         SELECT * FROM (VALUES
-            ('3m',  INTERVAL '21 days',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 180) = 0 )'),
             ('5m',  INTERVAL '60 days',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 300) = 0 )'),
             ('15m', INTERVAL '120 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 900) = 0 )'),
-            ('30m', INTERVAL '180 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 1800) = 0 )'),
             ('1h',  INTERVAL '180 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 3600) = 0 )'),
             ('4h',  INTERVAL '365 days',  'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 14400) = 0 )'),
-            ('1d',  INTERVAL '5 years',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 86400) = 0 )'),
-            ('1w',  INTERVAL '10 years',  'CHECK ( (EXTRACT(ISODOW FROM "timestamp") = 1) AND ("timestamp"::time = ''00:00:00'') )'),
-            ('1M',  INTERVAL '50 years',  'CHECK ( (EXTRACT(DAY FROM "timestamp") = 1) AND ("timestamp"::time = ''00:00:00'') )')
+            ('1d',  INTERVAL '5 years',   'CHECK ( (EXTRACT(EPOCH FROM "timestamp")::bigint % 86400) = 0 )')
         ) AS t(tf, chunk, align_sql)
     LOOP
         tbl_name := 'stop_loss_' || rec.tf;

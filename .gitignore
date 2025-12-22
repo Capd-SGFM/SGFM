@@ -3,5 +3,6 @@ backtesting_backend/
 DB_backend/
 LLM_Server_backend/
 paper_trading_backend/
+ml_models/
 .env
 .env.server

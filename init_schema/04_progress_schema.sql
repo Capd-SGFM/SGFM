@@ -35,7 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_backfill_progress_updated
 COMMENT ON TABLE trading_data.backfill_progress IS '과거 데이터 백필 진행률 추적';
 COMMENT ON COLUMN trading_data.backfill_progress.run_id IS '백필 실행 ID';
 COMMENT ON COLUMN trading_data.backfill_progress.symbol IS '종목명';
-COMMENT ON COLUMN trading_data.backfill_progress.interval IS '시간봉 (1h, 4h, 1d, 1w, 1M)';
+COMMENT ON COLUMN trading_data.backfill_progress.interval IS '시간봉 (1m, 5m, 15m, 1h, 4h, 1d)';
 COMMENT ON COLUMN trading_data.backfill_progress.state IS '진행 상태 (PENDING/PROGRESS/SUCCESS/FAILURE)';
 COMMENT ON COLUMN trading_data.backfill_progress.pct_time IS '시간 기준 진행률 (0~100%)';
 COMMENT ON COLUMN trading_data.backfill_progress.last_candle_ts IS '마지막 처리된 캔들 타임스탬프';
@@ -68,7 +68,7 @@ CREATE INDEX IF NOT EXISTS idx_rest_progress_updated
 COMMENT ON TABLE trading_data.rest_progress IS 'REST API 유지보수 진행률 추적 (is_ended=False 캔들 보정)';
 COMMENT ON COLUMN trading_data.rest_progress.run_id IS '유지보수 실행 ID';
 COMMENT ON COLUMN trading_data.rest_progress.symbol IS '종목명';
-COMMENT ON COLUMN trading_data.rest_progress.interval IS '시간봉 (1h, 4h, 1d, 1w, 1M)';
+COMMENT ON COLUMN trading_data.rest_progress.interval IS '시간봉 (1m, 5m, 15m, 1h, 4h, 1d)';
 COMMENT ON COLUMN trading_data.rest_progress.state IS '진행 상태 (PENDING/PROGRESS/SUCCESS/FAILURE)';
 COMMENT ON COLUMN trading_data.rest_progress.last_candle_ts IS '마지막 처리된 캔들 타임스탬프';
 COMMENT ON COLUMN trading_data.rest_progress.last_error IS '에러 메시지';
@@ -101,7 +101,7 @@ CREATE INDEX IF NOT EXISTS idx_indicator_progress_updated
 COMMENT ON TABLE trading_data.indicator_progress IS '보조지표 계산 진행률 추적';
 COMMENT ON COLUMN trading_data.indicator_progress.run_id IS '지표 계산 실행 ID';
 COMMENT ON COLUMN trading_data.indicator_progress.symbol IS '종목명';
-COMMENT ON COLUMN trading_data.indicator_progress.interval IS '시간봉 (1h, 4h, 1d, 1w, 1M)';
+COMMENT ON COLUMN trading_data.indicator_progress.interval IS '시간봉 (1m, 5m, 15m, 1h, 4h, 1d)';
 COMMENT ON COLUMN trading_data.indicator_progress.state IS '진행 상태 (PENDING/PROGRESS/SUCCESS/FAILURE)';
 COMMENT ON COLUMN trading_data.indicator_progress.pct_time IS '시간 기준 진행률 (0~100%)';
 COMMENT ON COLUMN trading_data.indicator_progress.last_candle_ts IS '마지막 처리된 캔들 타임스탬프';
@@ -135,7 +135,7 @@ CREATE INDEX IF NOT EXISTS idx_ws_progress_updated
 COMMENT ON TABLE trading_data.websocket_progress IS 'WebSocket 실시간 연결 상태 추적';
 COMMENT ON COLUMN trading_data.websocket_progress.run_id IS 'WebSocket 세션 ID';
 COMMENT ON COLUMN trading_data.websocket_progress.symbol IS '종목명';
-COMMENT ON COLUMN trading_data.websocket_progress.interval IS '시간봉 (1h, 4h, 1d, 1w, 1M)';
+COMMENT ON COLUMN trading_data.websocket_progress.interval IS '시간봉 (1m, 5m, 15m, 1h, 4h, 1d)';
 COMMENT ON COLUMN trading_data.websocket_progress.state IS '연결 상태 (CONNECTED/DISCONNECTED/ERROR)';
 COMMENT ON COLUMN trading_data.websocket_progress.last_message_ts IS '마지막 메시지 수신 시각';
 COMMENT ON COLUMN trading_data.websocket_progress.message_count IS '수신된 메시지 개수';
